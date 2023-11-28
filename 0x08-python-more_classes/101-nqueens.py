@@ -1,63 +1,117 @@
 #!/usr/bin/python3
-"""N Queens Module.
 
-Contains the N Queens problem solver.
+"""
+File: 101-nqueens.py
+Desc: The program in this module solves the N queens problem.
+
 """
 import sys
 
 
-def error_exit(message="", code=1):
-    """Handles exit.
-
-    Args:
-        message (str): the message to display on stdout.
-        code (int): the exit code.
+def init_board(n):
     """
-    print(message)
-    exit(code)
-
-
-def test_pos(board, y):
-    """Tests if wether a queen can be placed at the current position.
-
-    Args:
-        board (list): the chessboard.
-        y (int): the height parameter.
+    Initialize an `n`x`n` sized chessboard with 0's.
     """
-    for i in range(y):
-        if board[y][1] is board[i][1]:
-            return False
-        if abs(board[y][1] - board[i][1]) == y - i:
-            return False
-    return True
+    board = []
+    [board.append([]) for i in range(n)]
+    [row.append(' ') for i in range(n) for row in board]
+    return (board)
 
 
-def rec_backtrack(board, y):
-    """Backtrack the possibilities.
-
-    Args:
-        board (list): the chessboard.
-        y (int): the height parameter.
+def board_deepcopy(board):
     """
-    if y is N:
-        print(board)
-    else:
-        for x in range(N):
-            board[y][1] = x
-            if test_pos(board, y):
-                rec_backtrack(board, y + 1)
+    Return a deepcopy of a chessboard.
+    """
+    if isinstance(board, list):
+        return list(map(board_deepcopy, board))
+    return (board)
 
 
-if len(sys.argv) is not 2:
-    error_exit("Usage: nqueens N")
+def get_solution(board):
+    """
+    This function gets and retunrs the solution solved.
+    """
+    solution = []
+    for r in range(len(board)):
+        for c in range(len(board)):
+            if board[r][c] == "Q":
+                solution.append([r, c])
+                break
+    return (solution)
 
-try:
-    N = int(sys.argv[1])
-except:
-    error_exit("N must be a number")
 
-if N < 4:
-    error_exit("N must be at least 4")
+def xout(board, row, col):
+    """
+    X out spots on a chessboard.
+    """
+    for c in range(col + 1, len(board)):
+        board[row][c] = "x"
+    for c in range(col - 1, -1, -1):
+        board[row][c] = "x"
+    for r in range(row + 1, len(board)):
+        board[r][col] = "x"
+    for r in range(row - 1, -1, -1):
+        board[r][col] = "x"
+    c = col + 1
+    for r in range(row + 1, len(board)):
+        if c >= len(board):
+            break
+        board[r][c] = "x"
+        c += 1
+    c = col - 1
+    for r in range(row - 1, -1, -1):
+        if c < 0:
+            break
+        board[r][c]
+        c -= 1
+    c = col + 1
+    for r in range(row - 1, -1, -1):
+        if c >= len(board):
+            break
+        board[r][c] = "x"
+        c += 1
+    c = col - 1
+    for r in range(row + 1, len(board)):
+        if c < 0:
+            break
+        board[r][c] = "x"
+        c -= 1
 
-board = [[y, 0] for y in range(N)]
-rec_backtrack(board, 0)
+
+def recursive_solve(board, row, queens, solutions):
+    """
+    Recursively solve an N-queens puzzle
+    """
+    if queens == len(board):
+        solutions.append(get_solution(board))
+        return (solutions)
+
+    for c in range(len(board)):
+        if board[row][c] == " ":
+            tmp_board = board_deepcopy(board)
+            tmp_board[row][c] = "Q"
+            xout(tmp_board, row, c)
+            solutions = recursive_solve(tmp_board, row + 1,
+                                        queens + 1, solutions)
+
+    return (solutions)
+
+
+if __name__ == "__main__":
+    """
+    Program execution starts here.
+    """
+    if len(sys.argv) != 2:
+        print("Usage: nqueens N")
+        sys.exit(1)
+    if sys.argv[1].isdigit() is False:
+        print("N must be a number")
+        sys.exit(1)
+    if int(sys.argv[1]) < 4:
+        print("N must be at least 4")
+        sys.exit(1)
+
+    board = init_board(int(sys.argv[1]))
+    solutions = recursive_solve(board, 0, 0, [])
+    for sol in solutions:
+        print(sol)
